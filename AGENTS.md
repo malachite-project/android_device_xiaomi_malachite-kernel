@@ -1,17 +1,47 @@
-# Prebuilt kernel agent instructions
+# AGENTS.md
 
-## Artifact contracts
+Instructions for coding agents, and the people driving them, working in malachite's
+prebuilt kernel repository. The general rules (branches, commits, license headers,
+testing) are in the
+[device tree's AGENTS.md](https://github.com/malachite-project/android_device_xiaomi_malachite/blob/lineage-23.2/AGENTS.md)
+and apply here too, including working as an official LineageOS maintainer would: fix
+causes properly, never with workarounds.
 
-- This is the Android-consumed prebuilt artifact repository, not the source kernel. Preserve existing Image, DTB, module, and load-list bytes during read-only inspection/tooling changes.
-- Do not remove duplicate or unmatched load entries simply to satisfy a checker. Preserve load order until producer/consumer and runtime evidence justify an intentional change.
-- A matching filename, ELF header, or vermagic string is not proof of ABI/KMI, symbol CRC, signing, configuration, or firmware compatibility.
-- Keep the documented DTBO deployment exclusion. Presence of `dtbo.img` is historical inventory, not permission to package or flash it.
-- Any replacement proposal needs pinned source/build provenance and artifact-level comparison; never flatten an arbitrary distribution over the trusted baseline.
+## What this repository is
 
-## Guidance and verification
+The kernel the device tree ships: `Image.lz4`, the DTBs, the module directories and the
+`modules.load.*` lists, consumed at `device/xiaomi/malachite-kernel`. It is built from the
+kernel sources in [kernel_manifest-6.1](https://github.com/malachite-project/kernel_manifest-6.1),
+not edited here.
 
-Use [README.md](README.md) for inspector scope and [SOURCE_MIGRATION.md](SOURCE_MIGRATION.md) for migration evidence. Run the affected Python tests in `tests/`; the documented inspector is read-only and must not load modules or execute artifacts.
+## Rules
 
-Separate source-contract checks from actual artifact inspection, populated build outputs, Android packaging, and hardware tests. Preserve honest GAP/failure results rather than treating structural success as release readiness.
+- **Never edit artifacts by hand.** A new kernel or module comes from a build of the
+  kernel sources. The commit body names the source commits, the build command and the
+  config used.
+- **Never copy a whole build output over this repository.** Compare it with what is here
+  first: configuration, module list, vermagic, exported symbols, signing, load order.
+  Replace only what you mean to replace.
+- **Keep the module load order.** Don't reorder or remove `modules.load.*` entries just
+  to silence a warning; the order is what makes the phone boot.
+- **DTBO:** `dtbo.img` is kept for reference only. The device tree doesn't flash it,
+  because flashing the wrong DTBO across firmware versions has bricked phones. Never make
+  it flashed again without an explicit request.
+- **Never run flashing commands**, and never suggest downgrading or cross-flashing
+  firmware to match a kernel.
 
-Finish with the requested tooling/evidence checked and unchanged-payload claims verified against the base. Repository permission does not authorize flashing, rebooting, slot changes, wipes, or sensitive-partition access.
+## Checking artifacts
+
+```
+python3 tools/inspect_prebuilts.py
+```
+
+The inspector checks hashes, headers and load lists. It doesn't prove a kernel boots;
+say so when reporting.
+
+## Commits
+
+```
+malachite-kernel: update modules to <source commit>
+malachite-kernel: tools: recognize the Android DT-table container
+```
