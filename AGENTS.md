@@ -3,7 +3,7 @@
 Instructions for coding agents, and the people driving them, working in malachite's
 prebuilt kernel repository. The general rules (branches, commits, license headers,
 testing) are in the
-[device tree's AGENTS.md](https://github.com/malachite-project/android_device_xiaomi_malachite/blob/lineage-23.2/AGENTS.md)
+[device tree's AGENTS.md](https://github.com/malachite-project/android_device_xiaomi_malachite/blob/lineage-24.0/AGENTS.md)
 and apply here too, including working as an official LineageOS maintainer would: fix
 causes properly, never with workarounds.
 
